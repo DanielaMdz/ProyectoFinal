@@ -114,7 +114,6 @@ session_start(); // Inicia la sesión para el login/carrito
               
               <?php if (isset($_SESSION['id_usuario'])): // --- LOGUEADO (MENÚ) --- ?>
                 <li class="nav-item"><a href="php/historial.php" class="nav-link">Mis Compras</a></li>
-                <li class="nav-item"><a href="php/perfil.php" class="nav-link">Mi Perfil</a></li>
                 <?php endif; ?>
             </ul>
 
