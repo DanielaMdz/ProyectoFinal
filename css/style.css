@@ -672,7 +672,7 @@ Single Product section style start
 .nav-pills .nav-link.active,
 .nav-pills .show>.nav-link {
   color: var(--light-color);
-  background-color: var(--accent-color);
+  background-color: var(--color-cafe-crema-medio);
 }
 
 /*
@@ -690,6 +690,8 @@ Single Product section style start
     --color-cafe-oscuro: #8B4513;     /* Botones / Texto Principal */
     --color-cafe-muy-oscuro: #5A2D0A; /* Headers / Dark Text */
     --color-seccion-base: #FFFFFF;    /* Forms/Cards Background */
+    --color-cafe-crema-medio: #bc8b80;
+
     
     /* Mapeo de variables Bootstrap y Waggy */
     --accent-color: var(--color-rosa-medio);
@@ -760,4 +762,44 @@ h1,h2,h3,h4,h5,h6 {
 /* Iconos de Categoría al pasar el mouse */
 a.categories-item:hover iconify-icon.category-icon {
     color: var(--color-rosa-medio);
+}
+
+/* =================================================================
+   NUEVO DISEÑO DEL HEADER (Terracota)
+   ================================================================= */
+
+/* Fondo del encabezado y la barra de navegación */
+header, .navbar {
+    background-color: #CB6D51 !important; /* Color Terracota */
+}
+
+/* Color del texto, enlaces e íconos en el encabezado */
+header .nav-link,
+header .navbar-brand,
+header .btn-outline-dark,
+header iconify-icon,
+header .search-bar input::placeholder,
+header .support-box h5,
+header .support-box span,
+header .navbar-toggler-icon,
+header .badge {
+    color: #ffffff !important;
+}
+
+/* Color del borde y texto del botón de búsqueda y otros botones */
+header .btn-outline-dark,
+header .search-bar {
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Efecto hover para el botón de búsqueda */
+header .btn-outline-dark:hover {
+    background-color: #ffffff !important;
+    color: #CB6D51 !important;
+}
+
+/* Asegurar que el input de búsqueda tenga texto blanco */
+header .search-bar input {
+    color: #ffffff !important;
 }

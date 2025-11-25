@@ -1,24 +1,13 @@
 <?php
-/*
-  ======================================================================
-  Página: login.php (Dentro de la carpeta /php/)
-  ¡USAMOS RUTAS ABSOLUTAS PARA LA REDIRECCIÓN!
-  ======================================================================
-*/
 
-// --- 1. DEFINICIÓN DE BASE_URL Y SESIÓN (ANTES DE LA REDIRECCIÓN) ---
-// La constante BASE_URL ya está definida en header.php, pero la definimos
-// aquí por si el script se sale antes de cargar el header.
 define('BASE_URL', '/html/ProyectoFinal'); 
-session_start(); // Aseguramos que la sesión inicie antes de usar $_SESSION
-
-// --- 2. LÓGICA DE PHP (Procesar el formulario) ---
+session_start(); 
 $error = ''; 
 
-// Revisa si el usuario ENVIÓ el formulario
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // La conexión a la BD debe ser la primera línea dentro del bloque POST
+
     require_once '../includes/db_connect.php';
 
     $correo = $_POST['correo_electronico'];
@@ -36,19 +25,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         // 3. Verificar si la contraseña coincide con el HASH
         if (password_verify($contrasena_plana, $usuario['contrasena'])) {
-            
-            // ¡ÉXITO! La contraseña es correcta.
-            
+
             // 4. Guardar los datos del usuario en la SESIÓN
             $_SESSION['id_usuario'] = $usuario['id_usuario'];
             $_SESSION['nombre_usuario'] = $usuario['nombre_usuario'];
-            // (Si tuvieras un campo de admin, lo pones aquí)
-            // $_SESSION['es_admin'] = $usuario['es_admin']; 
+            $_SESSION['es_admin'] = $usuario['es_admin'];
 
             // 5. ¡REDIRECCIÓN CORREGIDA! 
-            // Usamos la ruta absoluta: /html/ProyectoFinal/index.php
             header("Location: " . BASE_URL . "/index.php");
-            exit; // ¡Importante! Detener el script después de redirigir
+            exit; 
 
         } else {
             $error = "Correo o contraseña incorrectos.";
