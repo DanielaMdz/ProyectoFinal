@@ -5,7 +5,7 @@ session_start(); // Inicia la sesión para el login/carrito
 <html lang="es">
 
 <head>
-  <title>Waggy - Mi Tienda Online</title>
+  <title>Young - Mi</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +42,7 @@ session_start(); // Inicia la sesión para el login/carrito
         <div class="col-sm-4 col-lg-3 text-center text-sm-start">
           <div class="main-logo">
             <a href="index.php">
-              <img src="images/logo.png" alt="logo" class="img-fluid">
+              <img src="images/logo.webp" alt="logo" class="img-fluid">
             </a>
           </div>
         </div>

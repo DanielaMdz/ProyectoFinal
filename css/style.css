@@ -105,7 +105,7 @@ CSS STRUCTURE:
 
 /* Theme Colors */
 :root {
-  --accent-color: #DEAD6F;
+  --accent-color: #ff9fa8;
   --dark-color: #222222;
   --light-dark-color: #727272;
   --light-color: #fff;
@@ -142,7 +142,7 @@ body {
   --bs-body-line-height: 2;
   --bs-body-color: #41403E;
 
-  --bs-primary: #DEAD6F;
+  --bs-primary: #ffafcf;
   --bs-primary-rgb: 222, 173, 111;
 
   --bs-primary-bg-subtle: #FFF9EB;
@@ -159,14 +159,14 @@ body {
 .btn-primary {
   padding: 1.2rem 3rem;
   --bs-btn-color: #fff;
-  --bs-btn-bg: #DEAD6F;
+  --bs-btn-bg: #ffb8db;
   --bs-btn-border-color: transparent;
   --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #e9b775;
+  --bs-btn-hover-bg: #ffa3af;
   --bs-btn-hover-border-color: transparent;
   --bs-btn-focus-shadow-rgb: 49, 132, 253;
   --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #DEAD6F;
+  --bs-btn-active-bg: #ffb3ec;
   --bs-btn-active-border-color: transparent;
   --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   --bs-btn-disabled-color: #fff;
@@ -178,19 +178,19 @@ body {
   transition: all 0.3s ease-in;
   padding: 1.2rem 3rem;
   letter-spacing: 0.02375rem;
-  --bs-btn-color: #DEAD6F;
-  --bs-btn-border-color: #DEAD6F;
+  --bs-btn-color: #ffa9a9;
+  --bs-btn-border-color: #ffa9a9;
   --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #DEAD6F;
-  --bs-btn-hover-border-color: #DEAD6F;
+  --bs-btn-hover-bg: #ffa9a9;
+  --bs-btn-hover-border-color: #ffa9a9;
   --bs-btn-focus-shadow-rgb: 13, 110, 253;
   --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #DEAD6F;
-  --bs-btn-active-border-color: #DEAD6F;
+  --bs-btn-active-bg: #ffa9a9;
+  --bs-btn-active-border-color: #ffa9a9;
   --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-  --bs-btn-disabled-color: #DEAD6F;
+  --bs-btn-disabled-color: #ffa9a9;
   --bs-btn-disabled-bg: transparent;
-  --bs-btn-disabled-border-color: #DEAD6F;
+  --bs-btn-disabled-border-color: #ffa9a9;
   --bs-gradient: none;
 }
 
@@ -357,7 +357,7 @@ a {
 .form-control:focus {
   color: var(--bs-body-color);
   background-color: var(--bs-body-bg);
-  border-color: #86b7fe;
+  border-color: #ffa9a9;
   outline: 0;
   box-shadow: none;
 }
@@ -380,7 +380,7 @@ iconify-icon.category-icon {
 }
 
 a.categories-item:hover iconify-icon.category-icon {
-  color: #DEAD6F;
+  color: #ffa9a9;
 }
 
 
@@ -438,7 +438,7 @@ button.filter-button {
 
 button.filter-button.active,
 button.filter-button:hover {
-  border-bottom: 2px solid #DEAD6F;
+  border-bottom: 2px solid #ffa9a9;
 }
 
 /* testimonial style  */
@@ -545,8 +545,8 @@ iconify-icon.social-icon {
 
 li.social:hover iconify-icon.social-icon {
   color: #FFF;
-  border: 1px solid #DEAD6F;
-  background: #DEAD6F;
+  border: 1px solid #ffa9a9;
+  background: #ffa9a9;
 }
 
 iconify-icon.send-icon {
@@ -555,8 +555,8 @@ iconify-icon.send-icon {
   padding: 0.75rem;
   border-radius: 4.375rem;
   color: #FFF;
-  border: 1px solid #DEAD6F;
-  background: #DEAD6F;
+  border: 1px solid #ffa9a9;
+  background: #ffa9a9;
 }
 
 
@@ -673,4 +673,91 @@ Single Product section style start
 .nav-pills .show>.nav-link {
   color: var(--light-color);
   background-color: var(--accent-color);
+}
+
+/*
+  =================================================================
+  CUSTOM OVERRIDES: ROSA PASTEL Y CAFÉ
+  Este bloque anula los colores de la plantilla Waggy.
+  =================================================================
+*/
+
+/* 1. PALETA DE COLORES "CUTE" (Define las variables) */
+:root {
+    --color-rosa-claro: #FADDE1;     /* Fondo general / Background */
+    --color-rosa-medio: #F8C3CD;     /* Accent / Primary Bootstrap */
+    --color-cafe-claro: #D4B2A0;     /* Borders / Subtly Dark */
+    --color-cafe-oscuro: #8B4513;     /* Botones / Texto Principal */
+    --color-cafe-muy-oscuro: #5A2D0A; /* Headers / Dark Text */
+    --color-seccion-base: #FFFFFF;    /* Forms/Cards Background */
+    
+    /* Mapeo de variables Bootstrap y Waggy */
+    --accent-color: var(--color-rosa-medio);
+    --primary-color: var(--color-cafe-oscuro); 
+    --dark-color: var(--color-cafe-muy-oscuro);
+
+    --bs-body-color: var(--color-cafe-muy-oscuro);
+    --bs-primary: var(--color-rosa-medio);
+}
+
+/* 2. APLICACIONES GLOBALES Y TIPOGRAFÍA */
+body {
+    background-color: var(--color-rosa-claro); /* Fondo Rosa Claro */
+    color: var(--color-cafe-muy-oscuro);
+    --bs-body-line-height: 1.6; /* Hacemos la línea más cómoda */
+}
+
+h1,h2,h3,h4,h5,h6 {
+    color: var(--color-cafe-muy-oscuro); /* Headers en Café Oscuro */
+}
+
+/* 3. BOTONES (Anulando las definiciones de la plantilla) */
+
+/* Botón Principal (Primary) */
+.btn-primary {
+    --bs-btn-bg: var(--color-cafe-oscuro);
+    --bs-btn-border-color: var(--color-cafe-oscuro);
+    --bs-btn-hover-bg: var(--color-cafe-muy-oscuro);
+    --bs-btn-hover-border-color: var(--color-cafe-muy-oscuro);
+    padding: 0.8rem 2rem; /* Reduce el padding para un look más limpio */
+}
+
+/* Botón Outline-Dark (Usado para 'shop now' / 'Buscar') */
+.btn-outline-dark {
+    --bs-btn-color: var(--color-cafe-muy-oscuro);
+    --bs-btn-border-color: var(--color-cafe-muy-oscuro);
+    --bs-btn-hover-color: var(--color-rosa-claro); /* Letras claras al pasar el mouse */
+    --bs-btn-hover-bg: var(--color-cafe-muy-oscuro);
+    --bs-btn-hover-border-color: var(--color-cafe-muy-oscuro);
+}
+
+/* Botón Dark (Usado para Registrar) */
+.btn-dark {
+    --bs-btn-bg: var(--color-cafe-muy-oscuro);
+    --bs-btn-border-color: var(--color-cafe-muy-oscuro);
+    --bs-btn-hover-bg: var(--color-cafe-oscuro);
+    --bs-btn-hover-border-color: var(--color-cafe-oscuro);
+    font-size: 1rem;
+    padding: 0.8rem 2rem;
+}
+
+
+/* 4. FORMULARIOS Y MENÚ */
+
+/* Foco en los campos de formulario */
+.form-control:focus {
+    border-color: var(--color-cafe-muy-oscuro);
+    box-shadow: 0 0 0 0.25rem rgba(139, 69, 19, 0.25); /* Sombra café */
+}
+
+/* Enlaces del Navbar al pasar el mouse (para que se vea la navegación) */
+.navbar-nav .nav-link.active,
+.nav-link:focus,
+.nav-link:hover {
+    color: var(--color-rosa-medio); 
+}
+
+/* Iconos de Categoría al pasar el mouse */
+a.categories-item:hover iconify-icon.category-icon {
+    color: var(--color-rosa-medio);
 }
