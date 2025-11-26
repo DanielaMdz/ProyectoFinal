@@ -24,7 +24,7 @@ $result_compras = mysqli_stmt_get_result($stmt);
 ?>
 
 <div class="container py-5">
-    <h1 class="text-center mb-4">📜 Tu Historial de Compras</h1>
+    <h1 class="text-center mb-4"> Tu Historial de Compras</h1>
 
     <?php if (isset($_GET['compra']) && $_GET['compra'] == 'exito'): ?>
         <div class="alert alert-success text-center mb-5">

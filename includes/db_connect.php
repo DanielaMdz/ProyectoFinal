@@ -7,7 +7,6 @@ $username = "root";            // Usuario por defecto de XAMPP
 $password = "";                 // La contraseña por defecto de XAMPP es VACÍA
 $dbname = "tienda_online";     // El nombre de tu base de datos
 
-// --- NO TOQUES NADA DEBAJO DE ESTA LÍNEA ---
 
 // Crear la conexión
 $conn = mysqli_connect($servername, $username, $password, $dbname);

@@ -4,7 +4,6 @@
 // 1. Lógica simple para simular el envío del correo
 $mensaje_alerta = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Aquí iría la función mail() real, pero para la práctica simulamos éxito
     $nombre = htmlspecialchars($_POST['nombre']);
     $mensaje_alerta = "¡Gracias $nombre! Hemos recibido tu mensaje. Te contactaremos pronto.";
 }

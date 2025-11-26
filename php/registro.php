@@ -1,9 +1,5 @@
 <?php
-/*
-  ======================================================================
-  Página: registro.php (Dentro de la carpeta /php/)
-  ======================================================================
-*/
+
 
 // --- 1. LÓGICA DE PHP (Procesar el formulario) ---
 $mensaje = ''; // Para mostrar mensajes de éxito o error
@@ -24,7 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $direccion = $_POST['direccion_postal'];
 
     // 2. ¡SEGURIDAD! Hashear la contraseña.
-    // NUNCA guardes contraseñas en texto plano.
     $contrasena_hash = password_hash($contrasena_plana, PASSWORD_DEFAULT);
 
     // 3. Preparar la consulta SQL (Previene Inyección SQL)
