@@ -52,7 +52,7 @@ if (isset($_GET['query'])) {
             <?php while ($producto = mysqli_fetch_assoc($result)): ?>
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm">
-                        <a href="producto_detalle.php?id=<?php echo $producto['id_producto']; ?>">
+                        <a href="php/producto_detalle.php?id=<?php echo $producto['id_producto']; ?>">
                             <div style="height: 250px; overflow: hidden; border-radius: 15px; background: #fff;">
                                 <img src="<?php echo BASE_URL . "/" . $producto['fotos']; ?>" 
                                      class="img-fluid" 

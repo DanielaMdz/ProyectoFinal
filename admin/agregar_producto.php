@@ -1,75 +1,135 @@
 <?php
 // admin/agregar_producto.php
+// 1. CONTROL DE BÚFER Y ERRORES (CRUCIAL)
+ob_start(); // Inicia el almacenamiento en búfer para prevenir errores de "Headers sent"
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT); // Forzar excepciones de MySQL
+error_reporting(E_ALL); // Reportar todo
+ini_set('display_errors', 1); // Mostrar errores en pantalla
 
-// 1. CONFIGURACIÓN Y SEGURIDAD
 require_once '../includes/db_connect.php';
-session_start();
 
-// Verificar si es admin
+// Iniciar sesión de forma segura
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Definir BASE_URL si no existe
+if (!defined('BASE_URL')) define('BASE_URL', '/html/ProyectoFinal');
+
+// Verificar Admin
 if (!isset($_SESSION['es_admin']) || $_SESSION['es_admin'] != 1) {
-    header("Location: ../index.php");
+    header("Location: " . BASE_URL . "/index.php");
     exit;
 }
 
 $mensaje = '';
 $tipo_mensaje = '';
 
-// 2. PROCESAR FORMULARIO (Cuando le das a "Guardar")
+// 2. PROCESAR FORMULARIO
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // Recibir datos
-    $nombre = $_POST['nombre'];
-    $descripcion = $_POST['descripcion'];
-    $precio = $_POST['precio'];
-    $cantidad = $_POST['cantidad_en_almacen'];
-    $fabricante = $_POST['fabricante'];
-    $origen = $_POST['origen'];
-    $id_categoria = $_POST['id_categoria'];
+    // A. Recibir y LIMPIAR datos (Casting explícito para evitar errores de tipo)
+    $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
+    $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
+    $fabricante = isset($_POST['fabricante']) ? trim($_POST['fabricante']) : '';
+    $origen = isset($_POST['origen']) ? trim($_POST['origen']) : 'Corea del Sur';
     
-    // Procesar Imagen
-    $foto = $_FILES['foto'];
-    $ruta_db = ''; // Lo que guardaremos en la BD
+    // Convertir explícitamente a números para evitar errores SQL
+    $precio = isset($_POST['precio']) ? (float)$_POST['precio'] : 0.0;
+    $cantidad = isset($_POST['cantidad_en_almacen']) ? (int)$_POST['cantidad_en_almacen'] : 0;
+    $id_categoria = isset($_POST['id_categoria']) ? (int)$_POST['id_categoria'] : 0;
 
-    if ($foto['error'] == 0) {
-        $nombre_archivo = "prod_" . time() . ".jpg"; // Nombre único
-        $carpeta_destino = '../images/productos/';   // Carpeta física
-        
-        // Crear carpeta si no existe
-        if (!is_dir($carpeta_destino)) mkdir($carpeta_destino, 0777, true);
-        
-        if (move_uploaded_file($foto['tmp_name'], $carpeta_destino . $nombre_archivo)) {
-            // Guardamos la ruta relativa para que funcione con BASE_URL
-            $ruta_db = 'images/productos/' . $nombre_archivo;
+    // B. Validaciones
+    if ($id_categoria === 0) {
+        $mensaje = "Error: Debes seleccionar una categoría válida.";
+        $tipo_mensaje = "danger";
+    } elseif (empty($nombre) || $precio <= 0) {
+        $mensaje = "Error: El nombre y el precio son obligatorios.";
+        $tipo_mensaje = "danger";
+    } else {
+        // C. Procesar Imagen
+        $foto = $_FILES['foto'] ?? null;
+        $ruta_db = ''; 
+
+        if ($foto && $foto['error'] == 0) {
+            $nombre_archivo = "prod_" . time() . ".jpg"; 
+            $carpeta_destino = '../images/productos/'; 
+            
+            // Verificar permisos y existencia de carpeta
+            if (!is_dir($carpeta_destino)) {
+                if (!mkdir($carpeta_destino, 0777, true)) {
+                    $mensaje = "Error: No se pudo crear la carpeta de imágenes (Permisos denegados).";
+                    $tipo_mensaje = "danger";
+                }
+            }
+            
+            if (empty($mensaje)) {
+                if (move_uploaded_file($foto['tmp_name'], $carpeta_destino . $nombre_archivo)) {
+                    $ruta_db = 'images/productos/' . $nombre_archivo;
+                } else {
+                    $mensaje = "Error al mover la imagen. Verifique permisos de carpeta.";
+                    $tipo_mensaje = "danger";
+                }
+            }
         } else {
-            $mensaje = "Error al subir la imagen.";
+            $mensaje = "Error: La imagen es obligatoria.";
             $tipo_mensaje = "danger";
         }
     }
 
+    // D. Insertar en BD
     if (empty($mensaje)) {
-        // Insertar en Base de Datos
-        $sql = "INSERT INTO Productos (nombre, descripcion, fotos, precio, cantidad_en_almacen, fabricante, origen, id_categoria) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sssdisii", $nombre, $descripcion, $ruta_db, $precio, $cantidad, $fabricante, $origen, $id_categoria);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            $mensaje = "¡Producto agregado exitosamente!";
-            $tipo_mensaje = "success";
-        } else {
-            $mensaje = "Error SQL: " . mysqli_error($conn);
+        try {
+            // Asegurarnos que la conexión existe
+            if (!isset($conn) || !$conn) throw new Exception("No hay conexión a la base de datos.");
+
+            $sql = "INSERT INTO Productos (nombre, descripcion, fotos, precio, cantidad_en_almacen, fabricante, origen, id_categoria) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = mysqli_prepare($conn, $sql);
+            
+            if (!$stmt) throw new Exception("Error al preparar la consulta: " . mysqli_error($conn));
+
+            // Bind param con tipos ESTRICTOS:
+            // s=string, s=string, s=string, d=double, i=int, s=string, s=string, i=int
+            // NOTA: 'origen' es STRING ('s'), no INT ('i')
+            mysqli_stmt_bind_param($stmt, "sssdissi", 
+                $nombre, 
+                $descripcion, 
+                $ruta_db, 
+                $precio, 
+                $cantidad, 
+                $fabricante, 
+                $origen, 
+                $id_categoria
+            );
+            
+            if (mysqli_stmt_execute($stmt)) {
+                $mensaje = "¡Producto agregado exitosamente!";
+                $tipo_mensaje = "success";
+                // Limpiar POST para evitar reenvío al refrescar (opcional)
+                $nombre = $descripcion = $fabricante = '';
+                $precio = $cantidad = $id_categoria = 0;
+            } else {
+                throw new Exception("Error al ejecutar: " . mysqli_stmt_error($stmt));
+            }
+            mysqli_stmt_close($stmt);
+
+        } catch (mysqli_sql_exception $e) {
+            $mensaje = "Error SQL: " . $e->getMessage();
+            $tipo_mensaje = "danger";
+        } catch (Throwable $e) { // Captura errores generales de PHP 7+
+            $mensaje = "Error del Sistema: " . $e->getMessage();
             $tipo_mensaje = "danger";
         }
-        mysqli_stmt_close($stmt);
     }
 }
 
-// 3. OBTENER CATEGORÍAS (Para el select)
+// Cargar Categorías
 $sql_cat = "SELECT * FROM Categorias";
 $result_cat = mysqli_query($conn, $sql_cat);
+if (!$result_cat) $mensaje = "Error cargando categorías: " . mysqli_error($conn);
 
-// Usamos la ruta ../ para salir de admin/ y entrar a includes/
 require_once '../includes/header.php'; 
 ?>
 
@@ -79,14 +139,14 @@ require_once '../includes/header.php';
             
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="display-6" style="color: #8B4513; font-family: 'Chilanka', cursive;">Nuevo Producto K-Beauty</h2>
-                <a href="index.php" class="btn btn-outline-secondary rounded-pill px-4">
+                <a href="<?php echo BASE_URL; ?>/admin_index.php" class="btn btn-outline-secondary rounded-pill px-4">
                     <iconify-icon icon="mdi:arrow-left"></iconify-icon> Volver
                 </a>
             </div>
 
             <?php if ($mensaje): ?>
                 <div class="alert alert-<?php echo $tipo_mensaje; ?> text-center shadow-sm rounded-3">
-                    <?php echo $mensaje; ?>
+                    <strong><?php echo ($tipo_mensaje == 'danger') ? '¡Ups!' : '¡Éxito!'; ?></strong> <?php echo $mensaje; ?>
                 </div>
             <?php endif; ?>
 
@@ -96,27 +156,27 @@ require_once '../includes/header.php';
                 </div>
                 
                 <div class="card-body p-5 bg-white">
-                    <form action="agregar_producto.php" method="POST" enctype="multipart/form-data">
+                    <form action="admin/agregar_producto.php" method="POST" enctype="multipart/form-data">
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-muted">Nombre del Producto</label>
-                                <input type="text" class="form-control" name="nombre" placeholder="Ej. Ginseng Essence Water" required>
+                                <input type="text" class="form-control" name="nombre" value="<?php echo isset($_POST['nombre']) ? htmlspecialchars($_POST['nombre']) : ''; ?>" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-muted">Marca / Fabricante</label>
-                                <input type="text" class="form-control" name="fabricante" placeholder="Ej. Beauty of Joseon" required>
+                                <input type="text" class="form-control" name="fabricante" value="<?php echo isset($_POST['fabricante']) ? htmlspecialchars($_POST['fabricante']) : ''; ?>" required>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-bold text-muted">Precio ($)</label>
-                                <input type="number" step="0.01" class="form-control" name="precio" placeholder="0.00" required>
+                                <input type="number" step="0.01" class="form-control" name="precio" value="<?php echo isset($_POST['precio']) ? $_POST['precio'] : ''; ?>" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold text-muted">Stock Inicial</label>
-                                <input type="number" class="form-control" name="cantidad_en_almacen" value="10" required>
+                                <input type="number" class="form-control" name="cantidad_en_almacen" value="<?php echo isset($_POST['cantidad_en_almacen']) ? $_POST['cantidad_en_almacen'] : '10'; ?>" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold text-muted">Origen</label>
@@ -128,17 +188,24 @@ require_once '../includes/header.php';
                             <label class="form-label fw-bold text-muted">Categoría</label>
                             <select class="form-select" name="id_categoria" required>
                                 <option value="">Selecciona una categoría...</option>
-                                <?php while($cat = mysqli_fetch_assoc($result_cat)): ?>
-                                    <option value="<?php echo $cat['id_categoria']; ?>">
+                                <?php 
+                                if ($result_cat) {
+                                    mysqli_data_seek($result_cat, 0); 
+                                    while($cat = mysqli_fetch_assoc($result_cat)): 
+                                ?>
+                                    <option value="<?php echo $cat['id_categoria']; ?>" <?php echo (isset($_POST['id_categoria']) && $_POST['id_categoria'] == $cat['id_categoria']) ? 'selected' : ''; ?>>
                                         <?php echo $cat['nombre_categoria']; ?>
                                     </option>
-                                <?php endwhile; ?>
+                                <?php 
+                                    endwhile; 
+                                }
+                                ?>
                             </select>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold text-muted">Descripción</label>
-                            <textarea class="form-control" name="descripcion" rows="3" placeholder="Breve descripción de los beneficios..."></textarea>
+                            <textarea class="form-control" name="descripcion" rows="3"><?php echo isset($_POST['descripcion']) ? htmlspecialchars($_POST['descripcion']) : ''; ?></textarea>
                         </div>
 
                         <div class="mb-4">
@@ -161,4 +228,7 @@ require_once '../includes/header.php';
     </div>
 </div>
 
-<?php require_once '../includes/footer.php'; ?>
+<?php 
+require_once '../includes/footer.php'; 
+ob_end_flush(); // Enviar todo el contenido al navegador
+?>
