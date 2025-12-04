@@ -1,77 +1,13 @@
-<style>
-    :root {
-        --color-fondo: #F9F3EC;
-        --color-cafe: #8B4513;
-        --color-blanco: #FFFFFF;
-    }
-
-    body { 
-        font-family: 'Montserrat', sans-serif; 
-        background-color: var(--color-fondo);
-    }
-
-    /* Tarjeta Principal */
-    .card-admin {
-        background: var(--color-blanco);
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(139, 69, 19, 0.08);
-        overflow: hidden;
-    }
-
-    /* Tabla */
-    .table thead { background-color: var(--color-cafe); color: white; }
-    .table tbody td { vertical-align: middle; }
-    
-    /* --- ARREGLO DE BOTONES --- */
-    
-    /* Botón Nuevo Producto (Café Sólido) */
-    .btn-cafe {
-        background-color: #8B4513 !important;
-        color: #FFFFFF !important;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-    }
-    .btn-cafe iconify-icon { color: #FFFFFF !important; } /* Forzar ícono blanco */
-
-    /* Botones de Acción (Editar/Borrar) */
-    .btn-outline-danger { border-color: #dc3545; color: #dc3545; }
-    .btn-outline-danger:hover { background-color: #dc3545; color: white; }
-    
-    /* Asegurar que los íconos de acción tengan su color correcto */
-    .text-danger iconify-icon { color: #dc3545 !important; }
-    .text-primary iconify-icon { color: #0d6efd !important; }
-    
-    /* Botones de Stock (+/-) */
-    .btn-stock {
-        background: white;
-        border: 1px solid #ccc;
-        color: #8B4513 !important; /* Íconos café */
-        width: 30px; height: 30px;
-        border-radius: 50%;
-        display: inline-flex; align-items: center; justify-content: center;
-        text-decoration: none;
-    }
-    .btn-stock iconify-icon { color: #8B4513 !important; }
-
-    
-</style>
 <?php
-// admin_index.php (En la raíz)
-
-// 1. CONFIGURACIÓN
 require_once 'includes/db_connect.php'; 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. SEGURIDAD
 if (!isset($_SESSION['es_admin']) || $_SESSION['es_admin'] != 1) {
     die("<div class='container py-5 text-center'><h2>⛔ Acceso Denegado</h2><a href='index.php' class='btn btn-primary'>Volver</a></div>");
 }
 
-// 3. LÓGICA DE ACCIONES (BORRAR, SUBIR STOCK, BAJAR STOCK)
 if (isset($_GET['accion']) && isset($_GET['id'])) {
     $id = intval($_GET['id']);
     $accion = $_GET['accion'];
@@ -93,12 +29,9 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
     }
 }
 
-// 4. CONSULTAS
-// A) Inventario
 $sql_prod = "SELECT * FROM Productos ORDER BY id_producto DESC";
 $res_prod = mysqli_query($conn, $sql_prod);
 
-// B) Historial de Ventas Global (Uniendo tablas para ver nombres)
 $sql_ventas = "SELECT H.*, U.nombre_usuario, P.nombre as nombre_producto 
                FROM Historial_de_compras H
                JOIN Usuarios U ON H.id_usuario = U.id_usuario
@@ -119,6 +52,28 @@ require_once 'includes/header.php';
     .btn-cafe { background-color: var(--color-cafe); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; }
     .btn-cafe:hover { background-color: #5e2f0d; color: white; }
     .table-img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+    
+    .btn-stock {
+        background-color: #8B4513;
+        color: white !important;
+        width: 30px; 
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-stock:hover {
+        background-color: #5e2f0d;
+    }
+
+    /* Estilos recuperados para los botones de acción */
+    .text-primary iconify-icon { color: #ea8791 !important; }
+    .text-danger iconify-icon { color: #dc3545 !important; }
+    .btn-light { background-color: #f8f9fa; border: 1px solid #eee; }
+    .btn-light:hover { background-color: #e2e6ea; }
 </style>
 
 <div class="container pb-5 mt-4">
@@ -153,21 +108,44 @@ require_once 'includes/header.php';
                         <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center gap-3">
-                                    <img src="<?php echo BASE_URL . '/' . $prod['fotos']; ?>" class="table-img">
+                                    <img src="<?php echo BASE_URL . '/' . $prod['fotos']; ?>" 
+                                         class="table-img" 
+                                         onerror="this.src='https://via.placeholder.com/50'">
                                     <span class="fw-bold text-dark"><?php echo htmlspecialchars($prod['nombre']); ?></span>
                                 </div>
                             </td>
-                            <td class="fw-bold" style="color: #8B4513;">$<?php echo number_format($prod['precio'], 2); ?></td>
+                            <td class="fw-bold" style="color: #8B4513;">
+                                $<?php echo number_format($prod['precio'], 2); ?>
+                            </td>
                             <td class="text-center">
-                                <a href="admin_index.php?accion=bajar_stock&id=<?php echo $prod['id_producto']; ?>" class="text-decoration-none text-secondary"><iconify-icon icon="mdi:minus-circle" class="fs-5"></iconify-icon></a>
-                                <span class="badge <?php echo ($prod['cantidad_en_almacen'] < 5) ? 'bg-danger' : 'bg-success'; ?> mx-2 rounded-pill"><?php echo $prod['cantidad_en_almacen']; ?></span>
-                                <a href="admin_index.php?accion=subir_stock&id=<?php echo $prod['id_producto']; ?>" class="text-decoration-none text-secondary"><iconify-icon icon="mdi:plus-circle" class="fs-5"></iconify-icon></a>
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                    <a href="admin_index.php?accion=bajar_stock&id=<?php echo $prod['id_producto']; ?>" 
+                                       class="btn-stock text-white">
+                                        <iconify-icon icon="mdi:minus" class="fs-6 text-white"></iconify-icon>
+                                    </a>
+
+                                    <span class="fw-bold fs-5 mx-2" style="color: #000000; min-width: 30px;">
+                                        <?php echo $prod['cantidad_en_almacen']; ?>
+                                    </span>
+
+                                    <a href="admin_index.php?accion=subir_stock&id=<?php echo $prod['id_producto']; ?>" 
+                                       class="btn-stock text-white">
+                                        <iconify-icon icon="mdi:plus" class="fs-6 text-white"></iconify-icon>
+                                    </a>
+                                </div>
                             </td>
                             <td class="text-end pe-4">
-                                <a href="admin/editar_producto.php?id=<?php echo $prod['id_producto']; ?>" class="btn btn-sm btn-light text-primary rounded-circle" title="Editar">
+                                <!-- Botones regresados al estilo original btn-light -->
+                                <a href="admin/editar_producto.php?id=<?php echo $prod['id_producto']; ?>" 
+                                   class="btn btn-sm btn-light text-primary rounded-circle" 
+                                   title="Editar">
                                     <iconify-icon icon="mdi:pencil" class="fs-5"></iconify-icon>
                                 </a>
-                                <a href="admin_index.php?accion=borrar&id=<?php echo $prod['id_producto']; ?>" class="btn btn-sm btn-light text-danger rounded-circle" onclick="return confirm('¿Eliminar?');">
+                                
+                                <a href="admin_index.php?accion=borrar&id=<?php echo $prod['id_producto']; ?>" 
+                                   class="btn btn-sm btn-light text-danger rounded-circle" 
+                                   onclick="return confirm('¿Eliminar este producto permanentemente?');"
+                                   title="Eliminar">
                                     <iconify-icon icon="mdi:trash-can-outline" class="fs-5"></iconify-icon>
                                 </a>
                             </td>
@@ -209,8 +187,8 @@ require_once 'includes/header.php';
                                     </div>
                                 </td>
                                 <td><?php echo htmlspecialchars($venta['nombre_producto']); ?></td>
-                                <td class="text-center"><?php echo $venta['cantidad']; ?></td>
-                                <td class="text-end pe-4 fw-bold text-success">$<?php echo number_format($total_linea, 2); ?></td>
+                                <td class="text-center fw-bold text-dark"><?php echo $venta['cantidad']; ?></td>
+                                <td class="text-end pe-4 fw-bold" style="color: #8B4513;">$<?php echo number_format($total_linea, 2); ?></td>
                             </tr>
                             <?php endwhile; ?>
                         <?php else: ?>

@@ -1,10 +1,9 @@
 <?php
 // admin/agregar_producto.php
-// 1. CONTROL DE BÚFER Y ERRORES (CRUCIAL)
-ob_start(); // Inicia el almacenamiento en búfer para prevenir errores de "Headers sent"
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT); // Forzar excepciones de MySQL
-error_reporting(E_ALL); // Reportar todo
-ini_set('display_errors', 1); // Mostrar errores en pantalla
+ob_start(); 
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
 
 require_once '../includes/db_connect.php';
 
@@ -28,18 +27,15 @@ $tipo_mensaje = '';
 // 2. PROCESAR FORMULARIO
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // A. Recibir y LIMPIAR datos (Casting explícito para evitar errores de tipo)
     $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
     $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
     $fabricante = isset($_POST['fabricante']) ? trim($_POST['fabricante']) : '';
     $origen = isset($_POST['origen']) ? trim($_POST['origen']) : 'Corea del Sur';
     
-    // Convertir explícitamente a números para evitar errores SQL
     $precio = isset($_POST['precio']) ? (float)$_POST['precio'] : 0.0;
     $cantidad = isset($_POST['cantidad_en_almacen']) ? (int)$_POST['cantidad_en_almacen'] : 0;
     $id_categoria = isset($_POST['id_categoria']) ? (int)$_POST['id_categoria'] : 0;
 
-    // B. Validaciones
     if ($id_categoria === 0) {
         $mensaje = "Error: Debes seleccionar una categoría válida.";
         $tipo_mensaje = "danger";
@@ -47,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mensaje = "Error: El nombre y el precio son obligatorios.";
         $tipo_mensaje = "danger";
     } else {
-        // C. Procesar Imagen
+
         $foto = $_FILES['foto'] ?? null;
         $ruta_db = ''; 
 
@@ -55,7 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $nombre_archivo = "prod_" . time() . ".jpg"; 
             $carpeta_destino = '../images/productos/'; 
             
-            // Verificar permisos y existencia de carpeta
             if (!is_dir($carpeta_destino)) {
                 if (!mkdir($carpeta_destino, 0777, true)) {
                     $mensaje = "Error: No se pudo crear la carpeta de imágenes (Permisos denegados).";
@@ -77,10 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // D. Insertar en BD
     if (empty($mensaje)) {
         try {
-            // Asegurarnos que la conexión existe
             if (!isset($conn) || !$conn) throw new Exception("No hay conexión a la base de datos.");
 
             $sql = "INSERT INTO Productos (nombre, descripcion, fotos, precio, cantidad_en_almacen, fabricante, origen, id_categoria) 
@@ -90,9 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             if (!$stmt) throw new Exception("Error al preparar la consulta: " . mysqli_error($conn));
 
-            // Bind param con tipos ESTRICTOS:
-            // s=string, s=string, s=string, d=double, i=int, s=string, s=string, i=int
-            // NOTA: 'origen' es STRING ('s'), no INT ('i')
             mysqli_stmt_bind_param($stmt, "sssdissi", 
                 $nombre, 
                 $descripcion, 
@@ -107,7 +97,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (mysqli_stmt_execute($stmt)) {
                 $mensaje = "¡Producto agregado exitosamente!";
                 $tipo_mensaje = "success";
-                // Limpiar POST para evitar reenvío al refrescar (opcional)
                 $nombre = $descripcion = $fabricante = '';
                 $precio = $cantidad = $id_categoria = 0;
             } else {
@@ -230,5 +219,5 @@ require_once '../includes/header.php';
 
 <?php 
 require_once '../includes/footer.php'; 
-ob_end_flush(); // Enviar todo el contenido al navegador
+ob_end_flush(); 
 ?>
